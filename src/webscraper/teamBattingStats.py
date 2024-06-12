@@ -2,7 +2,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import pprint
 import pickle
-from tenacity import retry
 from alive_progress import alive_bar
 
 options = webdriver.ChromeOptions()

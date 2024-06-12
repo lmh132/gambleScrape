@@ -1,6 +1,9 @@
 import pickle
-import pprint
+import json
 
 with open("teamstats.pickle", "rb") as f:
-    idk = pickle.load(f)
-    pprint.pp(idk)
+    a = pickle.load(f)
+    with open("teamstats.json", "w") as g:
+        json.dump(a, g)
+        g.close()
+    f.close()
