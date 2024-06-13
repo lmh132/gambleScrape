@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import pprint
-import pickle
+import json
 from alive_progress import alive_bar
 
 options = webdriver.ChromeOptions()
@@ -10,6 +10,7 @@ driver = webdriver.Chrome(options=options)
 driver.implicitly_wait(5)
 
 #team codes tp iterate through
+
 team_codes = [
     "ARI",
     "ATL",
@@ -71,6 +72,6 @@ for team in team_codes:
 
 pprint.pp(team_stats)
 
-with open('teamstats.pickle', 'wb') as f:
-    pickle.dump(team_stats, f)
+with open('miami.json', 'w') as f:
+    json.dump(team_stats, f)
     f.close()

@@ -45,6 +45,8 @@ team_codes = [
     "WSN"
 ]
 
+team_codes = ["MIA"]
+
 pitcher_stats = {}
 
 class Queue:
@@ -145,7 +147,7 @@ for team in team_codes:
                     }
                     progbar()
 
-with open('data/pitcherstats.json', 'w') as f:
+with open('miami.json', 'w') as f:
     json.dump(pitcher_stats, f)
     f.close()
 

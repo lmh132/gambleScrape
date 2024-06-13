@@ -11,6 +11,8 @@ teamstats = json.load(a)
 pitcherstats = json.load(b)
 
 df = pd.DataFrame({
+    "player" : [],
+    "date" : [],
     "IP" : [],
     "avgSO" : [],
     "Pit" : [],
@@ -29,7 +31,9 @@ for pitcher in pitcherstats:
 
         for i in range(len(games.keys())-1):
             game = pitcherstats[pitcher][season][list(games.keys())[i]]
-            row = [game["IP"], 
+            row = [pitcher,
+                   list(games.keys())[i],
+                   game["IP"], 
                    game["avgSO"], 
                    game["Pit"], 
                    game["Str"], 
@@ -42,4 +46,4 @@ for pitcher in pitcherstats:
             df.index += 1
             df = df.sort_index()
 
-pprint.pp(df)
+df.to_csv("data/allData.csv")
