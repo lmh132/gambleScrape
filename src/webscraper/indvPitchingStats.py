@@ -27,6 +27,7 @@ team_codes = [
     "KCR",
     "LAA",
     "LAD",
+    "MIA",
     "MIL",
     "MIN",
     "NYM",
@@ -96,12 +97,12 @@ for team in team_codes:
             table = driver.find_element(By.ID, "pitching_gamelogs")
             data_rows = table.find_elements(By.CSS_SELECTOR, '[id][data-row]')
 
-            queueIP = Queue(5)
-            queueSO = Queue(5)
-            queuePit = Queue(5)
-            queueStr = Queue(5)
+            queueIP = Queue(3)
+            queueSO = Queue(3)
+            queuePit = Queue(3)
+            queueStr = Queue(3)
             
-            with alive_bar(len(data_rows)) as bar:
+            with alive_bar(len(data_rows)) as progbar:
                 for row in data_rows:
                     date = row.find_element(By.CSS_SELECTOR, '[data-stat="date_game"]').get_attribute("csk")[:10]
                     innings_pitched = float(row.find_element(By.CSS_SELECTOR, '[data-stat="IP"]').text)
@@ -131,9 +132,10 @@ for team in team_codes:
                         queueStr.put(strikes)
 
                     foo = pitcher_stats.setdefault(playercode, {})
-                    foo.setdefault(date, {})
-
-                    pitcher_stats[playercode][date] = {
+                    bar = foo.setdefault(year, {})
+                    bar.setdefault(date, {})
+                    
+                    pitcher_stats[playercode][year][date] = {
                         "Opp" : row.find_element(By.CSS_SELECTOR, '[data-stat="opp_ID"]').find_element(By.XPATH, "./a").text,
                         "IP" : queueIP.mean(),
                         "avgSO" : queueSO.mean(),
@@ -141,9 +143,9 @@ for team in team_codes:
                         "Pit" : queuePit.mean(),
                         "Str" : queueStr.mean()
                     }
-                    bar()
+                    progbar()
 
-with open('pitcherstats.json', 'w') as f:
+with open('data/pitcherstats.json', 'w') as f:
     json.dump(pitcher_stats, f)
     f.close()
 

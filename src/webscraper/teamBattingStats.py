@@ -25,6 +25,7 @@ team_codes = [
     "KCR",
     "LAA",
     "LAD",
+    "MIA",
     "MIL",
     "MIN",
     "NYM",
