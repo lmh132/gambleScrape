@@ -30,7 +30,13 @@ for projection in df["data"]:
             id_lines[temp_dict_2["new_player"]["data"]["id"]] = projection["attributes"]["line_score"]
 for projection in df["included"]:
     if projection["type"] == "new_player":
-        player_id[projection["attributes"]["name"]] = projection["id"]
+        if projection["id"] in id_lines:
+            player_id[projection["id"]] = projection["attributes"]["name"]
 
 print(player_id)
 print(id_lines)
+
+with open('lines.json', 'w') as f:
+    json.dump(player_id, f, indent = 4)
+    json.dump(id_lines, f, indent = 4)
+    f.close()
