@@ -1,8 +1,7 @@
 import pickle
 import json
 
-a = open("data/teamstats.json")
-data = json.load(a)
-
-for i in range(0, len(data)):
-    print(data[i])
+with open("traindata.pkl", "rb") as f:
+    data = pickle.load(f)
+    print(data["prevgames"][0])
+    f.close()

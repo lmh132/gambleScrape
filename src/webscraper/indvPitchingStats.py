@@ -45,8 +45,6 @@ team_codes = [
     "WSN"
 ]
 
-team_codes = ["MIA"]
-
 pitcher_stats = {}
 
 class Queue:
@@ -99,10 +97,10 @@ for team in team_codes:
             table = driver.find_element(By.ID, "pitching_gamelogs")
             data_rows = table.find_elements(By.CSS_SELECTOR, '[id][data-row]')
 
-            queueIP = Queue(3)
-            queueSO = Queue(3)
-            queuePit = Queue(3)
-            queueStr = Queue(3)
+            #queueIP = Queue(3)
+            #queueSO = Queue(3)
+            #queuePit = Queue(3)
+            #queueStr = Queue(3)
             
             with alive_bar(len(data_rows)) as progbar:
                 for row in data_rows:
@@ -112,9 +110,10 @@ for team in team_codes:
                     pitches = row.find_element(By.CSS_SELECTOR, '[data-stat="pitches"]').text
                     strikes = row.find_element(By.CSS_SELECTOR, '[data-stat="strikes_total"]').text
 
-                    pitches = float(pitches) if pitches != "" else None
-                    strikes = float(strikes) if strikes != "" else None
+                    pitches = float(pitches) if pitches != "" else 80
+                    strikes = float(strikes) if strikes != "" else 50
 
+                    """
                     queueIP.put(innings_pitched)
                     queueSO.put(strikeouts)
                     if pitches == None:
@@ -132,22 +131,21 @@ for team in team_codes:
                             queueStr.put(queueStr.mean())
                     else:
                         queueStr.put(strikes)
-
+                    """
                     foo = pitcher_stats.setdefault(playercode, {})
                     bar = foo.setdefault(year, {})
                     bar.setdefault(date, {})
                     
                     pitcher_stats[playercode][year][date] = {
                         "Opp" : row.find_element(By.CSS_SELECTOR, '[data-stat="opp_ID"]').find_element(By.XPATH, "./a").text,
-                        "IP" : queueIP.mean(),
-                        "avgSO" : queueSO.mean(),
+                        "IP" : innings_pitched,
                         "SO" : strikeouts,
-                        "Pit" : queuePit.mean(),
-                        "Str" : queueStr.mean()
+                        "Pit" : pitches,
+                        "Str" : strikes
                     }
                     progbar()
 
-with open('miami.json', 'w') as f:
+with open('data/pitcherstats2.json', 'w') as f:
     json.dump(pitcher_stats, f)
     f.close()
 

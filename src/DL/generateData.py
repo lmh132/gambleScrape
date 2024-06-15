@@ -1,49 +1,41 @@
 import pandas as pd
 import json
-import datetime
+import pickle
 import pprint
-import collections
+from collections import OrderedDict
+from sklearn.preprocessing import StandardScaler
 
 a = open("data/teamstats.json")
-b = open("data/pitcherstats.json")
+b = open("data/pitcherstats2.json")
+scaler = StandardScaler()
 
 teamstats = json.load(a)
 pitcherstats = json.load(b)
 
-df = pd.DataFrame({
-    "player" : [],
-    "date" : [],
-    "IP" : [],
-    "avgSO" : [],
-    "Pit" : [],
-    "Str" : [],
-    "BA" : [],
-    "OBP" : [],
-    "SLG" : [],
-    "OPS" : [],
-    "SO" : []
-})
+prevgames = []
+oppstats = []
+strikeouts = []
+
+window_size = 3
 
 for pitcher in pitcherstats:
     for season in pitcherstats[pitcher]:
-        games = pitcherstats[pitcher][season]
-        games = collections.OrderedDict(sorted(games.items()))
+        pitchergames = OrderedDict(sorted(pitcherstats[pitcher][season].items()))
+        pitcherkeys = list(pitchergames.keys())
 
-        for i in range(len(games.keys())-1):
-            game = pitcherstats[pitcher][season][list(games.keys())[i]]
-            row = [pitcher,
-                   list(games.keys())[i],
-                   game["IP"], 
-                   game["avgSO"], 
-                   game["Pit"], 
-                   game["Str"], 
-                   teamstats[game["Opp"]][season][list(games.keys())[i]]["BA"], 
-                   teamstats[game["Opp"]][season][list(games.keys())[i]]["OBP"], 
-                   teamstats[game["Opp"]][season][list(games.keys())[i]]["SLG"], 
-                   teamstats[game["Opp"]][season][list(games.keys())[i]]["OPS"], 
-                   pitcherstats[pitcher][season][list(games.keys())[i+1]]["SO"]]
-            df.loc[-1] = row
-            df.index += 1
-            df = df.sort_index()
+        for i in range(len(pitcherkeys)-window_size-1):
+            seq = []
+            for j in range(window_size):
+                game = pitchergames[pitcherkeys[i+j]]
+                opp = teamstats[game["Opp"]][season][pitcherkeys[i+j]]
+                seq.append([game["IP"],game["SO"], game["Pit"], game["Str"], opp["BA"], opp["OBP"], opp["SLG"], opp["OPS"]])
+            
+            foo = teamstats[pitchergames[pitcherkeys[i+window_size]]["Opp"]][season][pitcherkeys[i+window_size]]
+            opponent = [foo["BA"], foo["OBP"], foo["SLG"], foo["OPS"]]
+            sos = pitchergames[pitcherkeys[i+window_size]]["SO"]
 
-df.to_csv("data/allData.csv")
+            prevgames += seq
+            oppstats += opponent
+            strikeouts.append(sos)
+
+pprint.pp(prevgames[:6])
