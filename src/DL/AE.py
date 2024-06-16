@@ -36,33 +36,21 @@ class Decoder(nn.Module):
         out = self.fc(out)
         return out
     
-class LSTMAutoencoder(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers):
-        super(LSTMAutoencoder, self).__init__()
+class Autoencoder(nn.Module):
+    def __init__(self, input_size, hidden_size, fc_output_size, num_layers):
+        super(Autoencoder, self).__init__()
         self.encoder = Encoder(input_size, hidden_size, num_layers)
+        self.fc = nn.Linear(hidden_size, fc_output_size)
         self.decoder = Decoder(hidden_size, input_size, num_layers)
 
     def forward(self, x):
         # Encoder
         hn, cn = self.encoder(x)
-        
-        # Decoder
-        # Prepare the initial input for the decoder (typically zeros or the last input frame)
+        fc_out = self.fc(hn[-1])
         decoder_input = torch.zeros(x.size(0), x.size(1), self.encoder.hidden_size).to(x.device)
         out = self.decoder(decoder_input, hn, cn)
-        
-        return out
-    
-def validate_model(model, dataloader, criterion):
-    model.eval()
-    total_loss = 0
-    with torch.no_grad():
-        for batch in dataloader:
-            batch = batch.to(device)
-            output = model(batch)
-            loss = criterion(output, batch)
-            total_loss += loss.item()
-    return total_loss / len(dataloader)
+        return out, fc_out
+
     
 f = open("data/traindatapickles/PREV.pkl", "rb")
 gamehistory = pickle.load(f)
@@ -71,47 +59,49 @@ traindataset = GameHistoryDataset(gamehistory[:5000])
 traindataloader = DataLoader(dataset=traindataset, batch_size=32, shuffle=True)
 
 testdataset = GameHistoryDataset(gamehistory[5000:10000])
-testdataloader = DataLoader(dataset=traindataset, batch_size=32, shuffle=True)
+testdataloader = DataLoader(dataset=testdataset, batch_size=32, shuffle=True)
 
     
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
 input_size = 8  # Dimensionality of input features
 hidden_size = 32  # Dimensionality of LSTM hidden states
+fc_output_size = 5 #num of output features on fc layer
 num_layers = 2  # Number of LSTM layers
 num_epochs = 100
 learning_rate = 0.001
 
 # Model, Loss, Optimizer
-model = LSTMAutoencoder(input_size, hidden_size, num_layers).to(device)
+model = Autoencoder(input_size, hidden_size, fc_output_size, num_layers).to(device)
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-# Training loop
-for epoch in range(num_epochs):
-    model.train()
-    for batch in traindataloader:
-        batch = batch.to(device)
+if __name__ == "__main__":
+    # Training loop
+    for epoch in range(num_epochs):
+        model.train()
+        for batch in traindataloader:
+            batch = batch.to(device)
 
-        out = model(batch)
+            out, fc_out = model(batch)
 
-        loss = criterion(out, batch)
+            loss = criterion(out, batch)
 
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-        val_loss = validate_model(model, testdataloader, criterion)
+            val_loss = validate_model(model, testdataloader, criterion)
 
-    if (epoch + 1) % 10 == 0:
-        print(f'Epoch [{epoch + 1}/{num_epochs}], Train Loss: {loss.item():.4f}, Val Loss: {val_loss:.4f}')
+        if (epoch + 1) % 10 == 0:
+            print(f'Epoch [{epoch + 1}/{num_epochs}], Train Loss: {loss.item():.4f}, Val Loss: {val_loss:.4f}')
 
-# Final validation
-final_val_loss = validate_model(model, testdataloader, criterion)
-print(f'Final Validation Loss: {final_val_loss:.4f}')
+    # Final validation
+    final_val_loss = validate_model(model, testdataloader, criterion)
+    print(f'Final Validation Loss: {final_val_loss:.4f}')
 
-# Save the model's state dictionary
-torch.save(model.state_dict(), 'model_state_dict.pth')
+    # Save the model's state dictionary
+    torch.save(model.state_dict(), 'models/AE_state.pth')
 
-# Alternatively, save the entire model
-torch.save(model, 'entire_model.pth')
+    # Alternatively, save the entire model
+    torch.save(model, 'models/AE.pth')
