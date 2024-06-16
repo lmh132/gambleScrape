@@ -6,16 +6,12 @@ from typing import Any
 from torch.utils.data import Dataset
 
 
-class BaseballDataset(Dataset):
-    def __init__(self, datadict):
-        self.datadict = datadict
+class GameHistoryDataset(Dataset):
+    def __init__(self, arr):
+        self.arr = arr
 
     def __len__(self):
-        return len(self.datadict["strikeouts"])
+        return self.arr.shape[0]
     
     def __getitem__(self, index) -> Any:
-        prevgamestats = self.datadict["prevgames"][index]
-        oppstats = self.datadict["oppstats"][index]
-        strikeouts = self.datadict["strikeouts"][index]
-
-        return (prevgamestats, oppstats), strikeouts
+        return self.arr[index]

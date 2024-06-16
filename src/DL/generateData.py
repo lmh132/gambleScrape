@@ -45,18 +45,18 @@ scaler2 = StandardScaler().fit(oppstats)
 scaled_prevgamedata = scaler1.transform(prevgames)
 scaled_oppdata = scaler2.transform(oppstats)
 
-PREV = np.array(scaled_prevgamedata).reshape(-1, 3, 8)
-OPP = np.array(scaled_oppdata)
-SO = np.array(strikeouts)
+PREV = np.array(scaled_prevgamedata, dtype=np.float32).reshape(-1, 3, 8)
+OPP = np.array(scaled_oppdata, dtype=np.float32)
+SO = np.array(strikeouts, dtype=np.float32)
 
-with open("data/PREV.pkl", "wb") as f:
+with open("data/traindatapickles/PREV.pkl", "wb") as f:
     pickle.dump(PREV, f)
     f.close()
 
-with open("data/OPP.pkl", "wb") as f:
+with open("data/traindatapickles/OPP.pkl", "wb") as f:
     pickle.dump(OPP, f)
     f.close()
 
-with open("data/SO.pkl", "wb") as f:
+with open("data/traindatapickles/SO.pkl", "wb") as f:
     pickle.dump(SO, f)
     f.close()
