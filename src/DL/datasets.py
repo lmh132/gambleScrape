@@ -15,3 +15,15 @@ class GameHistoryDataset(Dataset):
     
     def __getitem__(self, index) -> Any:
         return self.arr[index]
+    
+class PresentGameDataset(Dataset):
+    def __init__(self, encoded_data, opponent_stats, strikeouts):
+        self.encoded_data = encoded_data
+        self.opponent_stats = opponent_stats
+        self.strikeouts = strikeouts
+
+    def __len__(self):
+        return self.encoded_data.shape[0]
+    
+    def __getitem__(self, index) -> Any:
+        return (np.concatenate([self.encoded_data[index], self.opponent_stats[index]]), self.strikeouts[index])

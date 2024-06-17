@@ -74,7 +74,7 @@ def get_playercode(url: str):
 
 starttime = time.time()
 for team in team_codes:
-    for year in range(2019, 2024):
+    for year in range(2024, 2025):
         print("Gathering data for {team} in {year}".format(year = year, team = team))
         pitchers = []
         url = "https://www.baseball-reference.com/teams/{team}/{year}.shtml".format(team = team, year = year)
@@ -145,7 +145,7 @@ for team in team_codes:
                     }
                     progbar()
 
-with open('data/pitcherstats2.json', 'w') as f:
+with open('data/pitcherstats24.json', 'w') as f:
     json.dump(pitcher_stats, f)
     f.close()
 

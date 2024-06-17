@@ -76,6 +76,17 @@ model = Autoencoder(input_size, hidden_size, fc_output_size, num_layers).to(devi
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
+def validate_model(model, dataloader, criterion):
+    model.eval()
+    total_loss = 0
+    with torch.no_grad():
+        for batch in dataloader:
+            batch = batch.to(device)
+            output = model(batch)
+            loss = criterion(output, batch)
+            total_loss += loss.item()
+    return total_loss / len(dataloader)
+
 if __name__ == "__main__":
     # Training loop
     for epoch in range(num_epochs):

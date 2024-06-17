@@ -2,7 +2,7 @@ import pickle
 import json
 import numpy as np
 
-with open("data/traindatapickles/PROC.pkl", "rb") as f:
-    data = pickle.load(f)
-    print(data[0])
-    f.close()
+a = np.array([0, 3, 0.4])
+b = np.array([0, 3, 0.4])
+
+print(np.concatenate([a, b]))
